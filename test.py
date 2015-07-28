@@ -140,7 +140,11 @@ def _main():
                       help="Turn on debug logging")
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="turn off all logging")
-
+    parser.add_option("-b", "--bounds", action="store", dest="bounds",
+                      help="BBOX to test, in W,S,E,N format",
+                      default="-180,-80,180,80")
+    parser.add_option("-o", "--output", action="store", dest="output",
+                      help="output file", default="status.geojson")
     (options, args) = parser.parse_args()
 
     if len(args) != 1:
@@ -150,7 +154,23 @@ def _main():
     logging.basicConfig(level=logging.DEBUG if options.debug else
     (logging.ERROR if options.quiet else logging.INFO))
 
-    run_tests((-180, -80, 180, 80), args[0], status_path='status.geojson')
+    bounds_components = options.bounds.split(",")
+    if len(bounds_components) != 4:
+        logging.error("Bounds must have 4 components")
+        sys.exit(-1)
+
+    bounds = [int(f) for f in bounds_components]
+    for i in [0, 2]:
+        if bounds[i] < -180 or bounds[i] > 180:
+            logging.error("bounds component %i out of range -180 to 180" % (i + 1))
+            sys.exit(-1)
+
+    for i in [1, 3]:
+        if bounds[i] < -90 or bounds[i] > 90:
+            logging.error("bounds component %i out of range -90 to 90" % (i + 1))
+            sys.exit(-1)
+
+    run_tests(bounds, args[0], status_path=options.output)
 
 if __name__ == "__main__":
     _main()
