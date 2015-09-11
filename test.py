@@ -8,6 +8,7 @@ import json
 import fiona
 from shapely.geometry import Point, shape
 from shapely.prepared import prep
+import sys
 
 SUCCESS_COLOR = '#8FD933'
 POSSIBLE_ERROR_COLOR = '#FF9300'
